@@ -12,6 +12,7 @@ export function integrateData(newObj, existingObj) {
     if (typeof newObj !== "object" || typeof existingObj !== "object") {
         return newObj;
     }
+    if (!newObj || !existingObj) return newObj;
 
     //For arrays preserve the array, use splice to keep it array like
     if ('splice' in newObj && 'length' in existingObj) {

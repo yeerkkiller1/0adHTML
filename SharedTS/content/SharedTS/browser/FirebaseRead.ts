@@ -26,6 +26,8 @@ class FirebaseRead extends Directive {
     public startAt: string = <any>"=?";
     public endAt: string = <any>"=?";
 
+    public orderByKey: boolean = <any>"=?";
+
     public throttle: number = <any>"=?";
 
     public transform: (x) => any = <any>"=?";
@@ -39,6 +41,9 @@ class FirebaseRead extends Directive {
             var ref: FirebaseQuery = this.refBase.child(this.refPath);
             if (this.limitToLast) {
                 ref = ref.limitToLast(this.limitToLast);
+            }
+            if (this.orderByKey) {
+                ref = ref.orderByKey();
             }
             if (this.orderByChild) {
                 ref = ref.orderByChild(this.orderByChild);

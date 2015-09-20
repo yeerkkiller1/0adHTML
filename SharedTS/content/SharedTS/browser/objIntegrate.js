@@ -15,6 +15,8 @@ define(["require", "exports", "angular", "./Directive", "angular"], function (re
         if (typeof newObj !== "object" || typeof existingObj !== "object") {
             return newObj;
         }
+        if (!newObj || !existingObj)
+            return newObj;
         //For arrays preserve the array, use splice to keep it array like
         if ('splice' in newObj && 'length' in existingObj) {
             var oldObjs = existingObj.splice(0, existingObj.length);

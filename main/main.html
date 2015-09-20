@@ -3,13 +3,14 @@
 				is-array="true"
 				reverse="true"
 				limit-to-last="20"
+				order-by-key="true"
 				value="sessionsList"
 				></firebase-read>
 				
 <select ng-model="scope.sessionID">
 	<option ng-repeat="sessionInfo in sessionsList" value="{{sessionInfo.id}}">
 		{{sessionInfo.id}}
-	</div>
+	</option>
 </select>
 
 <sync-url var-name="'scope.sessionID'" url-name="'session'"></sync-url>
@@ -28,7 +29,7 @@
 					
 	<h1>{{scope.sessionID}}</h1>
 	<div class="mediumMargin" ng-repeat="(playerID, playerData) in sessionData.players">
-		<h2 class="flashin">{{playerID}}</h2>
+		<h2 class="flashin">{{playerData.name || playerID}}</h2>
 		
 		
 		<!-- Create a new scope, because we polute scrops with sync-variable -->
@@ -52,7 +53,7 @@
 					value="{food: 0, wood: 1, stone: 2, metal: 3}"
 					variable-name="'resIndexes'"></sync-variable>
 				
-			<h3 class="marginBottom0">Gatherings</h3>
+			<h3 class="marginBottom0">Gatherings (height: 50 resources)</h3>
 			<div class="relative debug fullWidth"
 				ng-style="{ height: '100px' }">
 				<div ng-repeat="(unitID, resDeltas) in playerData.res_deltas">
