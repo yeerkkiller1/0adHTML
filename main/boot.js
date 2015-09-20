@@ -1,10 +1,10 @@
-requirejs.config({
-	baseUrl: "/",
-	paths: {
-		"underscore": "libs/underscore"
-	}
-});
-
-define(["main/main"], function() {
-	
-})
+(function () {
+    var g = (function g() {
+        return this;
+    })();
+    g.require(["./defaultConfig"], function () {
+        g.require(["main/main"], function () {
+            angular.bootstrap(document, ["Base"]);
+        });
+    });
+})();

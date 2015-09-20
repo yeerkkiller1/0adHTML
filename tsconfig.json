@@ -2,5 +2,9 @@
 	"compilerOptions": {
 		"target": "ES5",
 		"module": "amd"
-	}
+	},
+	"exclude": [
+		"SharedTS.0.47/content/libs/jquery.d.ts",
+		"SharedTS.0.47/content/libs/angular.d.ts"
+	]
 }
