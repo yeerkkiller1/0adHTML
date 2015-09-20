@@ -1,0 +1,62 @@
+.mediumMargin {
+	margin: 8px;
+}
+
+.relative {
+  position: relative;
+}
+.absolute {
+  position: absolute;
+}
+
+.flashin {
+	animation-duration: 1s;
+	animation-name: flashin;	
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.marginBottom0 {
+  margin-bottom: 0px;
+}
+
+@keyframes flashin {
+  from {
+    background: transparent; 
+  }
+
+  to {
+    background: hsla(100, 75%, 75%, 0.5);
+  }
+}
+
+.debug {
+  outline: 1px solid hotpink;
+}
+
+
+.resource {
+  background: red;
+}
+.partialTransparent {
+  opacity: 0.3;
+}
+
+.resource-metal {
+  background: hsl(50, 75%, 75%);
+}
+.resource-stone {
+  background: hsl(50, 5%, 75%);
+}
+.resource-food {
+  background: hsl(100, 75%, 75%);
+}
+.resource-wood {
+  background: hsl(20, 57%, 30%);
+}
+
+.center {
+  transform: translateX(-50%) translateY(-50%);
+}

@@ -1,5 +1,120 @@
-{{test}}
 <firebase-read  ref-base="ref"
-				ref-path="'/'"
-				value="test"
+				ref-path="'/sessionsList'"
+				is-array="true"
+				reverse="true"
+				limit-to-last="20"
+				value="sessionsList"
 				></firebase-read>
+				
+<select ng-model="scope.sessionID">
+	<option ng-repeat="sessionInfo in sessionsList" value="{{sessionInfo.id}}">
+		{{sessionInfo.id}}
+	</div>
+</select>
+
+<sync-url var-name="'scope.sessionID'" url-name="'session'"></sync-url>
+
+			
+<sync-variable
+				value="1000 * 100"
+				variable-name="'maxTimeRange'"></sync-variable>
+
+<div ng-if="scope.sessionID">
+	<firebase-read  ref-base="ref"
+					ref-path="'/sessions/' + scope.sessionID"
+					value="sessionDataRAW"
+					></firebase-read>
+	<obj-integrate input="sessionDataRAW" output="sessionData"></obj-integrate>
+					
+	<h1>{{scope.sessionID}}</h1>
+	<div class="mediumMargin" ng-repeat="(playerID, playerData) in sessionData.players">
+		<h2 class="flashin">{{playerID}}</h2>
+		
+		
+		<!-- Create a new scope, because we polute scrops with sync-variable -->
+		<div ng-repeat="_ in [1]">
+			<sync-variable
+					value="max(flatten(playerData.res_deltas), 'time').time"
+					variable-name="'maxTime'"></sync-variable>
+			<sync-variable
+					value="min(flatten(playerData.res_deltas), 'time').time"
+					variable-name="'minTime'"></sync-variable>
+			
+			<sync-variable
+					value="min([maxTime - minTime, maxTimeRange])"
+					variable-name="'timeRange'"></sync-variable>
+					
+			<sync-variable
+					value="maxTime - timeRange"
+					variable-name="'timeStart'"></sync-variable>
+					
+			<sync-variable
+					value="{food: 0, wood: 1, stone: 2, metal: 3}"
+					variable-name="'resIndexes'"></sync-variable>
+				
+			<h3 class="marginBottom0">Gatherings</h3>
+			<div class="relative debug fullWidth"
+				ng-style="{ height: '100px' }">
+				<div ng-repeat="(unitID, resDeltas) in playerData.res_deltas">
+					<div ng-repeat="resDelta in resDeltas" 
+						class="flashin absolute resource resource-{{resDelta.type}} partialTransparent"
+						ng-if="resDelta.time >= timeStart"
+						ng-style="{
+							left: (resDelta.time - timeStart) / timeRange * 100 + '%', 
+							height: resDelta.amount * 2 + 'px',
+							width: '1px',
+							top: resIndexes[resDelta.type] * 25 + 'px'
+						}">
+					</div>
+				</div>
+			</div>
+		</div>
+					
+		<div ng-repeat="_ in [1]">
+			<sync-variable
+					value="max(playerData.res_history, 'time').time"
+					variable-name="'maxTime'"></sync-variable>
+			<sync-variable
+					value="min(playerData.res_history, 'time').time"
+					variable-name="'minTime'"></sync-variable>
+			
+			<sync-variable
+					value="min([maxTime - minTime, maxTimeRange])"
+					variable-name="'timeRange'"></sync-variable>
+					
+			<sync-variable
+					value="maxTime - timeRange"
+					variable-name="'timeStart'"></sync-variable>
+					
+			<sync-variable
+					value="'select(playerData.res_history, \'res\')'"
+					deep-comparison-value="true"
+					variable-name="'reses'"></sync-variable>
+					
+			<sync-variable value="max(reses, 'food').food" variable-name="'maxFood'"></sync-variable>
+			<sync-variable value="max(reses, 'wood').wood" variable-name="'maxWood'"></sync-variable>
+			<sync-variable value="max(reses, 'metal').metal" variable-name="'maxMetal'"></sync-variable>
+			<sync-variable value="max(reses, 'stone').stone" variable-name="'maxStone'"></sync-variable>
+			
+			<sync-variable value="max([maxFood, maxWood, maxMetal, maxStone])" variable-name="'maxResource'"></sync-variable>
+				
+			<h3 class="marginBottom0">Resources (max: {{maxResource}})</h3>	
+			<div class="relative debug fullWidth"
+				ng-style="{ height: '100px' }">
+				<div ng-repeat="resInfo in playerData.res_history"
+					ng-if="resInfo.time >= timeStart">
+					<div ng-repeat="(resType, resValue) in resInfo.res" 
+						class="flashin absolute resource resource-{{resType}}"
+						ng-style="{
+							left: (resInfo.time - timeStart) / timeRange * 95 + '%', 
+							top: (100 - resValue / maxResource * 100) + '%',
+							width: '5px',
+							height: '5px'
+						}">
+					</div>
+				</div>
+			</div>
+		</div>
+		
+	</div>
+</div>
