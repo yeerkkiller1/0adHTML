@@ -4,10 +4,10 @@ function g() {
 g().requirejs.config({
     baseUrl: "/",
     paths: {
-        "underscore": "libs/underscore",
-        "angular": "libs/angular",
-        "firebase": "libs/firebase",
-        "Directive": "SharedTS/browser/Directive"
+        "underscore": "SharedTS/content/libs/underscore",
+        "angular": "SharedTS/content/libs/angular",
+        "firebase": "SharedTS/content/libs/firebase",
+        "Directive": "SharedTS/content/SharedTS/browser/Directive"
     },
     shim: {
         angular: {

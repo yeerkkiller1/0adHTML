@@ -1,15 +1,11 @@
-/// <amd-dependency path="https://104236137119.com:7070/LogViewer/FirebaseRead.js">
+/// <amd-dependency path="SharedTS/content/SharedTS/browser/FirebaseRead.js">
 
-//Hmm... time to put this in a nuget package
-import CreateFirebasePromise = require("https://104236137119.com:7070/common/firebase/CreateFirebasePromise.ts")
-
-import Directive = require("SharedTS/browser/Directive");
+import Directive = require("SharedTS/content/SharedTS/browser/Directive");
 
 import _ = require("underscore");
 import angular = require("angular");
 import Firebase = require("firebase");
 
-console.log("test2");
 
 enum PieceKind {
 	Black,
@@ -33,12 +29,7 @@ class Base extends Directive {
 	public ref: Firebase;
 	
 	construct() {
-		this.ref = new Firebase("https://go-ai.firebaseio.com/");
-	}
-	run(launchCommand: string, board: Board) {
-		var kind = "gtprun";
-		var outputRef = this.ref.child(kind).child(launchCommand).child(board.toHash());
-		
+		this.ref = new Firebase("https://0ad.firebaseio.com/");
 	}
 }
 
