@@ -8,6 +8,9 @@
 .absolute {
   position: absolute;
 }
+.flex {
+  display: flex;
+}
 
 .flashin {
 	animation-duration: 1s;
