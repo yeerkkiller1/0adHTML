@@ -33,6 +33,7 @@
 		
 		
 		<!-- Create a new scope, because we polute scrops with sync-variable -->
+		<!--
 		<div ng-repeat="_ in [1]">
 			<sync-variable
 					value="max(flatten(playerData.res_deltas), 'time').time"
@@ -70,6 +71,7 @@
 				</div>
 			</div>
 		</div>
+		-->
 					
 		<div ng-repeat="_ in [1]">
 			<sync-variable
@@ -107,7 +109,7 @@
 					<div ng-repeat="(resType, resValue) in resInfo.res" 
 						class="flashin absolute resource resource-{{resType}}"
 						ng-style="{
-							left: (resInfo.time - timeStart) / timeRange * 95 + '%', 
+							left: (resInfo.time - timeStart) / timeRange * 100 + '%', 
 							top: (100 - resValue / maxResource * 100) + '%',
 							width: '5px',
 							height: '5px'
@@ -116,6 +118,45 @@
 				</div>
 			</div>
 		</div>
+		<div ng-repeat="_ in [1]">
+			<sync-variable
+					value="max(playerData.res_history, 'time').time"
+					variable-name="'maxTime'"></sync-variable>
+			<sync-variable
+					value="min(playerData.res_history, 'time').time"
+					variable-name="'minTime'"></sync-variable>
+			
+			<sync-variable
+					value="min([maxTime - minTime, maxTimeRange])"
+					variable-name="'timeRange'"></sync-variable>
+					
+			<sync-variable
+					value="maxTime - timeRange"
+					variable-name="'timeStart'"></sync-variable>
+					
+					
+					ng-if="resInfo.time >= timeStart"
+					
+			<h3 class="marginBottom0">Counts (scale: 100?)</h3>	
+			<div class="relative debug fullWidth"
+				ng-style="{ height: '100px' }">
+				<div ng-repeat="(unitType, unitsObj) in playerData.units">
+					{{unitType}}
+					<div ng-repeat="unitsInfo in unitsObj.count" 
+						class="flashin absolute resource"
+						ng-style="{
+							left: (unitsInfo.time - timeStart) / timeRange * 100 + '%', 
+							top: (100 - unitsInfo.count / 10 * 100) + '%',
+							width: '5px',
+							height: '5px'
+						}">
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		
+		
 		
 	</div>
 </div>
