@@ -13,6 +13,9 @@
 	animation-duration: 1s;
 	animation-name: flashin;	
 }
+.playersHolder {
+  -webkit-columns: 2;
+}
 
 .fullWidth {
   width: 100%;

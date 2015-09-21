@@ -20,14 +20,14 @@
 				value="1000 * 100"
 				variable-name="'maxTimeRange'"></sync-variable>
 
-<div ng-if="scope.sessionID">
+<h1>{{scope.sessionID}}</h1>
+<div class="playersHolder" ng-if="scope.sessionID">
 	<firebase-read  ref-base="ref"
 					ref-path="'/sessions/' + scope.sessionID"
 					value="sessionDataRAW"
 					></firebase-read>
 	<obj-integrate input="sessionDataRAW" output="sessionData"></obj-integrate>
 					
-	<h1>{{scope.sessionID}}</h1>
 	<div class="mediumMargin" ng-repeat="(playerID, playerData) in sessionData.players">
 		<h2 class="flashin">{{playerData.name || playerID}}</h2>
 		
