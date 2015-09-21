@@ -83,9 +83,36 @@ class Base extends Directive {
 	public getColor(text) {
 		return hsl(hashCode(text) % 360, 75, 75);
 	}
+	
+	public playerNames(playerIDs, playerNames) {
+		if(!playerNames) return [];
+		var arr = [];
+		_.forEach(_.keys(playerIDs), playerID => {
+			arr.push(playerNames[playerID] || playerID);
+		});
+		return arr;
+	}
+	
+	public keys(obj) {
+		return _.keys(obj);
+	}
 }
 
 var mod = angular.module("Base", ["FirebaseRead", "syncUrl", "SyncVariable", "objIntegrate", "FirebaseReadShallow"]);
 mod.directive("base", function() {
 	return <any>(new Base().createScope());
+});
+
+mod.filter('reverse', function () {
+	return function (items) {
+		return items.slice().reverse();
+	};
+});
+
+mod.filter('sort', function () {
+	return function (items) {
+		items = items.slice();
+		items.sort();
+		return items;
+	};
 });

@@ -1,10 +1,11 @@
 <sync-variable variable-name="'sessionsUrl'" value="ref.toString() + 'sessions'"></sync-variable>
-<firebase-read-shallow firebase-url="sessionsUrl" output="sessionsList"></firebase-read-shallow>
+<firebase-read-shallow firebase-url="sessionsUrl" output="sessionsListRAW"></firebase-read-shallow>
+<obj-integrate input="sessionsListRAW" output="sessionsList"></obj-integrate>
 
 <sync-url var-name="'scope.sessionID'" url-name="'session'"></sync-url>
 <select ng-model="scope.sessionID">
-	<option ng-repeat="(id, x) in sessionsList" value="{{id}}">
-		{{id}}
+	<option ng-repeat="id in keys(sessionsList) | sort | reverse" value="{{id}}">
+		{{id}} ({{playerNames(sessionsPlayersList[id], sessionsPlayers[id]).join(" ")}})
 	</option>
 </select>
 			
@@ -12,17 +13,25 @@
 				value="1000 * 100"
 				variable-name="'maxTimeRange'"></sync-variable>
 
+<div ng-repeat="(sessionID, x) in sessionsList">
+	<sync-variable variable-name="'playersPath'" value="sessionsUrl + '/' + sessionID + '/players'"></sync-variable>
+	<firebase-read-shallow firebase-url="playersPath" output="playersRAW"></firebase-read-shallow>
+	<obj-integrate input="playersRAW" output="$parent.sessionsPlayersList[sessionID]"></obj-integrate>
+	
+	<div ng-repeat="(playerID, x) in $parent.sessionsPlayersList[sessionID]">	
+		<sync-variable variable-name="'playerPath'" value="sessionsUrl + '/' + sessionID + '/players/' + playerID"></sync-variable>
+		<firebase-read-shallow ng-if="playerPath" firebase-url="playerPath + '/name'" 
+			output="$parent.$parent.$parent.sessionsPlayers[sessionID][playerID]"></firebase-read-shallow>
+	</div>
+</div>
+
 <h1>{{scope.sessionID}}</h1>
 <div class="playersHolder flex" ng-if="scope.sessionID">
-	
-	<sync-variable variable-name="'playersPath'" value="ref.toString() + 'sessions/' + scope.sessionID + '/players'"></sync-variable>
-	<firebase-read-shallow firebase-url="playersPath" output="playersRAW"></firebase-read-shallow>
-	<obj-integrate input="playersRAW" output="players"></obj-integrate>
-	
-				
-	<div class="mediumMargin fullWidth" ng-repeat="(playerID, x) in players">
-		<sync-variable variable-name="'playerPath'" value="playersPath + '/' + playerID"></sync-variable>
-		<firebase-read-shallow ng-if="playerPath" firebase-url="playerPath + '/name'" output="playerName"></firebase-read-shallow>
+	<div class="mediumMargin fullWidth" ng-repeat="(playerID, playerName) in sessionsPlayers[scope.sessionID]">
+	<!-- Needed so the firebase-read outputs a value? So a child scope has an object to inherit. -->	
+	<sync-variable variable-name="'playerPath'" value="sessionsUrl + '/' + scope.sessionID + '/players/' + playerID"></sync-variable>
+	<div ng-if="playerPath">
+		
 	
 		<h2 class="flashin">{{playerName || playerID}}</h2>
 		
@@ -63,7 +72,7 @@
 			<sync-variable value="max([maxFood, maxWood, maxMetal, maxStone])" variable-name="'maxResource'"></sync-variable>
 				
 			<h3 class="marginBottom0">Resources (max: {{maxResource}})</h3>	
-			<div class="relative debug fullWidth"
+			<div class="relative debug fullWidth hideOverflow"
 				ng-style="{ height: '100px' }">
 				<div ng-repeat="resInfo in resHistory"
 					ng-if="resInfo.time >= timeStart">
@@ -116,10 +125,10 @@
 					variable-name="'maxUnitCount'"></sync-variable>
 									
 			<h3 class="marginBottom0">Counts (scale: {{maxUnitCount}})</h3>	
-			<div class="relative debug fullWidth" ng-style="{ height: '100px' }">
+			<div class="relative debug fullWidth hideOverflow" ng-style="{ height: '100px' }">
 				<div ng-repeat="(unitString, x) in unitStrings">
 					<div class="unitTitle" ng-style="{background: getColor(unitString)}">
-						{{unitString}}
+						{{unitString}} ({{countTotal[unitString].count}})
 					</div>
 					<div ng-repeat="unitsInfo in unitCounts[unitString]" 
 						class="flashin absolute center"
@@ -143,7 +152,7 @@
 				</div>
 			</div>
 		</div>
-		
+		</div>
 		
 		
 		

@@ -5,6 +5,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = new __();
 };
 define(["require", "exports", "angular", "./Directive", "jquery"], function (require, exports, angular, Directive, $) {
+    var subscribed = 0;
     //Does a shallow sync through the rest API. Which is slower, and requires polling.
     //  But if you have a lot of children and just want keys, it is a lot faster.
     var FirebaseReadShallow = (function (_super) {
@@ -40,18 +41,23 @@ define(["require", "exports", "angular", "./Directive", "jquery"], function (req
                     update(curUpdateCount++);
                 };
             }
-            this.pollFrequency = this.pollFrequency || 1000;
+            this.pollFrequency = this.pollFrequency || 30000;
+            subscribed++;
+            console.log("Shallow subscribed to " + this.firebaseUrl + " " + subscribed + " subscriptions");
             var intervalID = setInterval(makeUpdate(), this.pollFrequency);
             this.$watch("pollFrequency", function (pollFrequency) {
                 clearInterval(intervalID);
                 intervalID = setInterval(makeUpdate(), _this.pollFrequency);
             });
             this.$watch("firebaseUrl", function (firebaseUrl) {
+                console.log("Shallow subscribed updated to " + _this.firebaseUrl + " " + subscribed + " subscriptions");
                 makeUpdate()();
             });
             this.$on("$destroy", function () {
                 clearInterval(intervalID);
                 lastUpdateCount = Number.POSITIVE_INFINITY;
+                subscribed--;
+                console.log("Shallow unsubscribed from " + _this.firebaseUrl + " " + subscribed + " subscriptions");
             });
         };
         return FirebaseReadShallow;
