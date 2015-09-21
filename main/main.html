@@ -107,7 +107,7 @@
 				<div ng-repeat="resInfo in playerData.res_history"
 					ng-if="resInfo.time >= timeStart">
 					<div ng-repeat="(resType, resValue) in resInfo.res" 
-						class="flashin absolute resource resource-{{resType}}"
+						class="flashin absolute resource resource-{{resType}} center"
 						ng-style="{
 							left: (resInfo.time - timeStart) / timeRange * 100 + '%', 
 							top: (100 - resValue / maxResource * 100) + '%',
@@ -134,18 +134,34 @@
 					value="maxTime - timeRange"
 					variable-name="'timeStart'"></sync-variable>
 									
-			<h3 class="marginBottom0">Counts (scale: 100?)</h3>	
+			<sync-variable
+					value="maxCount(playerData.units)"
+					variable-name="'maxUnitCount'"></sync-variable>
+									
+			<h3 class="marginBottom0">Counts (scale: {{maxUnitCount}})</h3>	
 			<div class="relative debug fullWidth"
 				ng-style="{ height: '100px' }">
 				<div ng-repeat="(unitType, unitsObj) in playerData.units">
-					{{unitType}}
+					<div class="unitTitle" ng-style="{background: getColor(unitType)}">
+						{{unitType}}
+					</div>
 					<div ng-repeat="unitsInfo in unitsObj.count" 
-						class="flashin absolute resource"
+						class="flashin absolute center"
 						ng-style="{
 							left: (unitsInfo.time - timeStart) / timeRange * 100 + '%', 
-							top: (100 - unitsInfo.count / 10 * 100) + '%',
+							top: (100 - unitsInfo.count / maxUnitCount * 100) + '%',
 							width: '5px',
-							height: '5px'
+							height: '5px',
+							background: getColor(unitType)
+						}">
+					</div>
+					<div class="flashin absolute"
+						ng-style="{
+							left: '0%', 
+							top: (100 - unitsObj.countTotal.count / maxUnitCount * 100) + '%',
+							width: '100%',
+							height: '2px',
+							background: getColor(unitType)
 						}">
 					</div>
 				</div>

@@ -7,6 +7,21 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 define(["require", "exports", "SharedTS/content/SharedTS/browser/Directive", "underscore", "angular", "firebase", "SharedTS/content/SharedTS/browser/FirebaseRead.js", "SharedTS/content/SharedTS/browser/syncUrl.js", "SharedTS/content/SharedTS/browser/SyncVariable.js", "SharedTS/content/SharedTS/browser/objIntegrate.js"], function (require, exports, Directive, _, angular, Firebase) {
+    function hashCode(text) {
+        var hash = 0, i, chr, len;
+        if (text.length == 0)
+            return hash;
+        for (i = 0, len = text.length; i < len; i++) {
+            chr = text.charCodeAt(i);
+            hash = ((hash << 5) - hash) + chr;
+            hash |= 0; // Convert to 32bit integer
+        }
+        return hash;
+    }
+    ;
+    function hsl(h, s, l) {
+        return "hsl(" + h + ", " + s + "%, " + l + "%)";
+    }
     var Base = (function (_super) {
         __extends(Base, _super);
         function Base() {
@@ -38,6 +53,16 @@ define(["require", "exports", "SharedTS/content/SharedTS/browser/Directive", "un
         };
         Base.prototype.select = function (obj, key) {
             return _.map(obj, function (x) { return x[key]; });
+        };
+        Base.prototype.maxCount = function (unitsObj) {
+            var max = 0;
+            _.forEach(unitsObj, function (unitObj) {
+                max = Math.max(max, unitObj.countTotal && unitObj.countTotal["count"]);
+            });
+            return max;
+        };
+        Base.prototype.getColor = function (text) {
+            return hsl(hashCode(text) % 360, 75, 75);
         };
         return Base;
     })(Directive);

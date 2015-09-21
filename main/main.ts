@@ -10,6 +10,21 @@ import _ = require("underscore");
 import angular = require("angular");
 import Firebase = require("firebase");
 
+function hashCode(text: string) {
+  var hash = 0, i, chr, len;
+  if (text.length == 0) return hash;
+  for (i = 0, len = text.length; i < len; i++) {
+    chr   = text.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
+
+function hsl(h, s, l) {
+	return "hsl("+h+", " + s + "%, " + l + "%)";
+}
+
 class Base extends Directive {
 	public templateUrl = "main/main.html";
 	public cssUrl = "main/main.css";
@@ -42,6 +57,18 @@ class Base extends Directive {
 	
 	public select(obj, key) {
 		return _.map(obj, x => x[key]);
+	}
+	
+	public maxCount(unitsObj) {
+		var max = 0;
+		_.forEach(unitsObj, unitObj => {
+			max = Math.max(max, unitObj.countTotal && unitObj.countTotal["count"]);
+		});
+		return max;
+	}
+	
+	public getColor(text) {
+		return hsl(hashCode(text) % 360, 75, 75);
 	}
 }
 
