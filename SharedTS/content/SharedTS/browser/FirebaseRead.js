@@ -37,7 +37,12 @@ define(["require", "exports", "angular", "./Directive", "underscore"], function 
                 previousUnsub();
                 if (!_this.refPath || !_this.refBase)
                     return;
-                var ref = _this.refBase.child(_this.refPath);
+                var refPathSafe = _this.refPath;
+                var fireURL = "firebaseio.com";
+                if (refPathSafe.indexOf(fireURL) >= 0) {
+                    refPathSafe = refPathSafe.slice(refPathSafe.indexOf(fireURL) + fireURL.length);
+                }
+                var ref = _this.refBase.child(refPathSafe);
                 if (_this.limitToLast) {
                     ref = ref.limitToLast(_this.limitToLast);
                 }

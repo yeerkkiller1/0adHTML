@@ -38,7 +38,12 @@ class FirebaseRead extends Directive {
         this.$watchGroup(["refBase", "refPath", "limitToLast", "orderByChild", "startAt", "endAt", "reverse"], () => {
             previousUnsub();
             if (!this.refPath || !this.refBase) return;
-            var ref: FirebaseQuery = this.refBase.child(this.refPath);
+            var refPathSafe = this.refPath;
+            var fireURL = "firebaseio.com";
+            if (refPathSafe.indexOf(fireURL) >= 0) {
+                refPathSafe = refPathSafe.slice(refPathSafe.indexOf(fireURL) + fireURL.length);
+            }
+            var ref: FirebaseQuery = this.refBase.child(refPathSafe);
             if (this.limitToLast) {
                 ref = ref.limitToLast(this.limitToLast);
             }

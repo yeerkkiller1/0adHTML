@@ -1,20 +1,12 @@
-<firebase-read  ref-base="ref"
-				ref-path="'/sessionsList'"
-				is-array="true"
-				reverse="true"
-				limit-to-last="20"
-				order-by-key="true"
-				value="sessionsList"
-				></firebase-read>
-				
-<select ng-model="scope.sessionID">
-	<option ng-repeat="sessionInfo in sessionsList" value="{{sessionInfo.id}}">
-		{{sessionInfo.id}}
-	</option>
-</select>
+<sync-variable variable-name="'sessionsUrl'" value="ref.toString() + 'sessions'"></sync-variable>
+<firebase-read-shallow firebase-url="sessionsUrl" output="sessionsList"></firebase-read-shallow>
 
 <sync-url var-name="'scope.sessionID'" url-name="'session'"></sync-url>
-
+<select ng-model="scope.sessionID">
+	<option ng-repeat="(id, x) in sessionsList" value="{{id}}">
+		{{id}}
+	</option>
+</select>
 			
 <sync-variable
 				value="1000 * 100"
@@ -22,75 +14,44 @@
 
 <h1>{{scope.sessionID}}</h1>
 <div class="playersHolder flex" ng-if="scope.sessionID">
-	<firebase-read  ref-base="ref"
-					ref-path="'/sessions/' + scope.sessionID"
-					value="sessionDataRAW"
-					></firebase-read>
-	<obj-integrate input="sessionDataRAW" output="sessionData"></obj-integrate>
-					
-	<div class="mediumMargin fullWidth" ng-repeat="(playerID, playerData) in sessionData.players">
-		<h2 class="flashin">{{playerData.name || playerID}}</h2>
-		
-		
-		<!-- Create a new scope, because we polute scrops with sync-variable -->
-		<!--
-		<div ng-repeat="_ in [1]">
-			<sync-variable
-					value="max(flatten(playerData.res_deltas), 'time').time"
-					variable-name="'maxTime'"></sync-variable>
-			<sync-variable
-					value="min(flatten(playerData.res_deltas), 'time').time"
-					variable-name="'minTime'"></sync-variable>
-			
-			<sync-variable
-					value="min([maxTime - minTime, maxTimeRange])"
-					variable-name="'timeRange'"></sync-variable>
-					
-			<sync-variable
-					value="maxTime - timeRange"
-					variable-name="'timeStart'"></sync-variable>
-					
-			<sync-variable
-					value="{food: 0, wood: 1, stone: 2, metal: 3}"
-					variable-name="'resIndexes'"></sync-variable>
+	
+	<sync-variable variable-name="'playersPath'" value="ref.toString() + 'sessions/' + scope.sessionID + '/players'"></sync-variable>
+	<firebase-read-shallow firebase-url="playersPath" output="playersRAW"></firebase-read-shallow>
+	<obj-integrate input="playersRAW" output="players"></obj-integrate>
+	
 				
-			<h3 class="marginBottom0">Gatherings (height: 50 resources)</h3>
-			<div class="relative debug fullWidth"
-				ng-style="{ height: '100px' }">
-				<div ng-repeat="(unitID, resDeltas) in playerData.res_deltas">
-					<div ng-repeat="resDelta in resDeltas" 
-						class="flashin absolute resource resource-{{resDelta.type}} partialTransparent"
-						ng-if="resDelta.time >= timeStart"
-						ng-style="{
-							left: (resDelta.time - timeStart) / timeRange * 100 + '%', 
-							height: resDelta.amount * 2 + 'px',
-							width: '1px',
-							top: resIndexes[resDelta.type] * 25 + 'px'
-						}">
-					</div>
-				</div>
-			</div>
-		</div>
-		-->
-					
+	<div class="mediumMargin fullWidth" ng-repeat="(playerID, x) in players">
+		<sync-variable variable-name="'playerPath'" value="playersPath + '/' + playerID"></sync-variable>
+		<firebase-read-shallow ng-if="playerPath" firebase-url="playerPath + '/name'" output="playerName"></firebase-read-shallow>
+	
+		<h2 class="flashin">{{playerName || playerID}}</h2>
+		
+		<firebase-read  ref-base="ref"
+						ref-path="playerPath + '/res_history'"
+						order-by-child="'time'"
+						limit-to-last="200"
+						value="resHistoryRAW"
+						></firebase-read>
+		<obj-integrate input="resHistoryRAW" output="resHistory"></obj-integrate>
+		
+		<!-- Create a new scope, because we pollute scopes with sync-variable -->
+		<sync-variable
+				value="max(resHistory, 'time').time"
+				variable-name="'maxTime'"></sync-variable>
+		<sync-variable
+				value="min(resHistory, 'time').time"
+				variable-name="'minTime'"></sync-variable>
+		
+		<sync-variable
+				value="maxTimeRange"
+				variable-name="'timeRange'"></sync-variable>
+		<sync-variable
+				value="maxTime - timeRange"
+				variable-name="'timeStart'"></sync-variable>
+						
 		<div ng-repeat="_ in [1]">
 			<sync-variable
-					value="max(playerData.res_history, 'time').time"
-					variable-name="'maxTime'"></sync-variable>
-			<sync-variable
-					value="min(playerData.res_history, 'time').time"
-					variable-name="'minTime'"></sync-variable>
-			
-			<sync-variable
-					value="min([maxTime - minTime, maxTimeRange])"
-					variable-name="'timeRange'"></sync-variable>
-					
-			<sync-variable
-					value="maxTime - timeRange"
-					variable-name="'timeStart'"></sync-variable>
-					
-			<sync-variable
-					value="'select(playerData.res_history, \'res\')'"
+					value="'select(resHistory, \'res\')'"
 					deep-comparison-value="true"
 					variable-name="'reses'"></sync-variable>
 					
@@ -104,7 +65,7 @@
 			<h3 class="marginBottom0">Resources (max: {{maxResource}})</h3>	
 			<div class="relative debug fullWidth"
 				ng-style="{ height: '100px' }">
-				<div ng-repeat="resInfo in playerData.res_history"
+				<div ng-repeat="resInfo in resHistory"
 					ng-if="resInfo.time >= timeStart">
 					<div ng-repeat="(resType, resValue) in resInfo.res" 
 						class="flashin absolute resource resource-{{resType}} center"
@@ -118,50 +79,65 @@
 				</div>
 			</div>
 		</div>
+		
+		<firebase-read  ref-base="ref"
+						ref-path="playerPath + '/units/unitStrings'"
+						value="unitStringsRAW"
+						></firebase-read>
+		<obj-integrate input="unitStringsRAW" output="unitStrings"></obj-integrate>
+		
+		<div ng-repeat="(unitString, x) in unitStrings">
+			<firebase-read  ref-base="ref"
+							ref-path="playerPath + '/units/count/' + unitString"
+							order-by-child="'time'"
+							limit-to-last="200"
+							value="unitCountsRAW"
+							></firebase-read>
+			<obj-integrate input="unitCountsRAW" output="$parent.unitCounts[unitString]"></obj-integrate>
+			
+			<firebase-read  ref-base="ref"
+							ref-path="playerPath + '/units/values/' + unitString"
+							order-by-child="'time'"
+							limit-to-last="200"
+							value="unitValuesRAW"
+							></firebase-read>
+			<obj-integrate input="unitValuesRAW" output="$parent.unitValues[unitString]"></obj-integrate>
+		</div>
+		
+		<firebase-read  ref-base="ref"
+						ref-path="playerPath + '/units/countTotal'"
+						value="countTotalRAW"
+						></firebase-read>
+		<obj-integrate input="countTotalRAW" output="countTotal"></obj-integrate>
+		<!--{{unitCounts}} {{unitValues}} {{countTotal}}-->
 		<div ng-repeat="_ in [1]">
 			<sync-variable
-					value="max(playerData.res_history, 'time').time"
-					variable-name="'maxTime'"></sync-variable>
-			<sync-variable
-					value="min(playerData.res_history, 'time').time"
-					variable-name="'minTime'"></sync-variable>
-			
-			<sync-variable
-					value="min([maxTime - minTime, maxTimeRange])"
-					variable-name="'timeRange'"></sync-variable>
-					
-			<sync-variable
-					value="maxTime - timeRange"
-					variable-name="'timeStart'"></sync-variable>
-									
-			<sync-variable
-					value="maxCount(playerData.units)"
+					value="max([max(countTotal, 'count').count, 0])"
 					variable-name="'maxUnitCount'"></sync-variable>
 									
 			<h3 class="marginBottom0">Counts (scale: {{maxUnitCount}})</h3>	
-			<div class="relative debug fullWidth"
-				ng-style="{ height: '100px' }">
-				<div ng-repeat="(unitType, unitsObj) in playerData.units">
-					<div class="unitTitle" ng-style="{background: getColor(unitType)}">
-						{{unitType}}
+			<div class="relative debug fullWidth" ng-style="{ height: '100px' }">
+				<div ng-repeat="(unitString, x) in unitStrings">
+					<div class="unitTitle" ng-style="{background: getColor(unitString)}">
+						{{unitString}}
 					</div>
-					<div ng-repeat="unitsInfo in unitsObj.count" 
+					<div ng-repeat="unitsInfo in unitCounts[unitString]" 
 						class="flashin absolute center"
 						ng-style="{
 							left: (unitsInfo.time - timeStart) / timeRange * 100 + '%', 
 							top: (100 - unitsInfo.count / maxUnitCount * 100) + '%',
 							width: '5px',
 							height: '5px',
-							background: getColor(unitType)
+							background: getColor(unitString)
 						}">
 					</div>
 					<div class="flashin absolute"
 						ng-style="{
 							left: '0%', 
-							top: (100 - unitsObj.countTotal.count / maxUnitCount * 100) + '%',
+							top: (100 - countTotal[unitString].count / maxUnitCount * 100) + '%',
 							width: '100%',
 							height: '2px',
-							background: getColor(unitType)
+							background: getColor(unitString)
 						}">
 					</div>
 				</div>

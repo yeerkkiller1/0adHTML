@@ -1,4 +1,5 @@
 /// <amd-dependency path="SharedTS/content/SharedTS/browser/FirebaseRead.js">
+/// <amd-dependency path="SharedTS/content/SharedTS/browser/FirebaseReadShallow.js">
 /// <amd-dependency path="SharedTS/content/SharedTS/browser/syncUrl.js">
 /// <amd-dependency path="SharedTS/content/SharedTS/browser/SyncVariable.js">
 var __extends = (this && this.__extends) || function (d, b) {
@@ -6,7 +7,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-define(["require", "exports", "SharedTS/content/SharedTS/browser/Directive", "underscore", "angular", "firebase", "SharedTS/content/SharedTS/browser/FirebaseRead.js", "SharedTS/content/SharedTS/browser/syncUrl.js", "SharedTS/content/SharedTS/browser/SyncVariable.js", "SharedTS/content/SharedTS/browser/objIntegrate.js"], function (require, exports, Directive, _, angular, Firebase) {
+define(["require", "exports", "SharedTS/content/SharedTS/browser/Directive", "underscore", "angular", "firebase", "SharedTS/content/SharedTS/browser/FirebaseRead.js", "SharedTS/content/SharedTS/browser/FirebaseReadShallow.js", "SharedTS/content/SharedTS/browser/syncUrl.js", "SharedTS/content/SharedTS/browser/SyncVariable.js", "SharedTS/content/SharedTS/browser/objIntegrate.js"], function (require, exports, Directive, _, angular, Firebase) {
     function hashCode(text) {
         var hash = 0, i, chr, len;
         if (text.length == 0)
@@ -46,6 +47,18 @@ define(["require", "exports", "SharedTS/content/SharedTS/browser/Directive", "un
             var fnc = key && (function (k) { return k[key]; });
             return _.min(obj, fnc);
         };
+        Base.prototype.mostRecent = function (obj, key, count) {
+            var arr = _.map(obj, _.identity);
+            arr.sort(function (a, b) {
+                if (a[key] < b[key]) {
+                    return -1;
+                }
+                else if (a[key] < b[key]) {
+                    return +1;
+                }
+                return 0;
+            });
+        };
         Base.prototype.flatten = function (obj) {
             var arr = [];
             _.forEach(obj, function (x) { return _.forEach(x, function (k) { return arr.push(k); }); });
@@ -57,7 +70,7 @@ define(["require", "exports", "SharedTS/content/SharedTS/browser/Directive", "un
         Base.prototype.maxCount = function (unitsObj) {
             var max = 0;
             _.forEach(unitsObj, function (unitObj) {
-                max = Math.max(max, unitObj.countTotal && unitObj.countTotal["count"]);
+                max = Math.max(max, unitObj["countTotal"] && unitObj["countTotal"]["count"]);
             });
             return max;
         };
@@ -66,7 +79,7 @@ define(["require", "exports", "SharedTS/content/SharedTS/browser/Directive", "un
         };
         return Base;
     })(Directive);
-    var mod = angular.module("Base", ["FirebaseRead", "syncUrl", "SyncVariable", "objIntegrate"]);
+    var mod = angular.module("Base", ["FirebaseRead", "syncUrl", "SyncVariable", "objIntegrate", "FirebaseReadShallow"]);
     mod.directive("base", function () {
         return (new Base().createScope());
     });

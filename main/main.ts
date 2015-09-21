@@ -1,4 +1,5 @@
 /// <amd-dependency path="SharedTS/content/SharedTS/browser/FirebaseRead.js">
+/// <amd-dependency path="SharedTS/content/SharedTS/browser/FirebaseReadShallow.js">
 /// <amd-dependency path="SharedTS/content/SharedTS/browser/syncUrl.js">
 /// <amd-dependency path="SharedTS/content/SharedTS/browser/SyncVariable.js">
 
@@ -49,9 +50,21 @@ class Base extends Directive {
 		return _.min(obj, fnc);
 	}
 	
+	public mostRecent(obj, key, count) {
+		var arr = _.map(obj, _.identity);
+		arr.sort((a, b) => {
+			if(a[key] < b[key]) {
+				return -1;
+			} else if(a[key] < b[key]) {
+				return +1;
+			}
+			return 0;
+		});
+	}
+	
 	public flatten(obj) {
 		var arr = [];
-		_.forEach(obj, x => _.forEach(x, k => arr.push(k)));
+		_.forEach(obj, x => _.forEach(<any>x, k => arr.push(k)));
 		return arr;
 	}
 	
@@ -62,7 +75,7 @@ class Base extends Directive {
 	public maxCount(unitsObj) {
 		var max = 0;
 		_.forEach(unitsObj, unitObj => {
-			max = Math.max(max, unitObj.countTotal && unitObj.countTotal["count"]);
+			max = Math.max(max, unitObj["countTotal"] && unitObj["countTotal"]["count"]);
 		});
 		return max;
 	}
@@ -72,7 +85,7 @@ class Base extends Directive {
 	}
 }
 
-var mod = angular.module("Base", ["FirebaseRead", "syncUrl", "SyncVariable", "objIntegrate"]);
+var mod = angular.module("Base", ["FirebaseRead", "syncUrl", "SyncVariable", "objIntegrate", "FirebaseReadShallow"]);
 mod.directive("base", function() {
 	return <any>(new Base().createScope());
 });
